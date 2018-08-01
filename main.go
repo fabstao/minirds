@@ -5,15 +5,16 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
-
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 
+	appsv1 "k8s.io/api/apps/v1"
+	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 )
 
@@ -71,6 +72,13 @@ func Dashboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	HandleError(w, err)
 }
 
+//CreaDBI es una funcion ...
+func CreaDBI(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	elres := crearDeplo(ps.ByName("nombre"))
+	err := tpl.ExecuteTemplate(w, "dbi.html", elres)
+	HandleError(w, err)
+}
+
 func main() {
 	router := httprouter.New()
 	router.GET("/", Index)
@@ -81,44 +89,160 @@ func main() {
 	router.GET("/login.aspx", Login)
 	router.POST("/login.aspx", Login)
 	router.GET("/dashboard.php", Dashboard)
+	router.GET("db/:nombre", CreaDBI)
 
 	log.Fatal(http.ListenAndServe(":8800", router))
 }
 
+type Creares struct {
+	resultado string
+	error     string
+}
+
 //**************************************************+
-func checknodes() {
+func crearDeplo(nombre string) Creares {
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		panic(err.Error())
+		return Creares{resultado: "NULL", error: err.Error()}
 	}
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		return Creares{resultado: "NULL", error: err.Error()}
 	}
-	//clientset.Scheduling()
-	for {
-		pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
+
+	//check deployments
+	//var no2 int32 = int32(2)
+	appName := nombre
+	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: nombre + "_depl",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: int32p(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": appName,
+				},
+			},
+			Template: apiv1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": appName,
+					},
+				},
+				Spec: apiv1.PodSpec{
+					Containers: []apiv1.Container{
+						{
+							Name:  "mariadbfabs",
+							Image: "gcr.io/fabs-cl-02/mariadbfabs",
+							Ports: []apiv1.ContainerPort{
+								{
+									Name:          "mysql",
+									Protocol:      apiv1.ProtocolTCP,
+									ContainerPort: 3306,
+								},
+							},
+							Env: []apiv1.EnvVar{
+								{
+									Name:  "MYSQL_ROOT_PASSWORD",
+									Value: "changeme1st",
+								},
+							},
+							VolumeMounts: []apiv1.VolumeMount{
+								{
+									Name:      appName + "vol",
+									MountPath: "/var/lib/mariadb",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Create Deployment
+	fmt.Println("Creating deployment...")
+	result, err := deploymentsClient.Create(deployment)
+	if err != nil {
+		return Creares{resultado: "NULL", error: err.Error()}
+	}
+	serviceSpec := &apiv1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: appName,
+		},
+		Spec: apiv1.ServiceSpec{
+			Type:     apiv1.ServiceTypeLoadBalancer,
+			Selector: map[string]string{"app": appName},
+			Ports: []apiv1.ServicePort{
+				apiv1.ServicePort{
+					Protocol: apiv1.ProtocolTCP,
+					Port:     3336,
+					TargetPort: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: int32(3306),
+					},
+				},
+			},
+		},
+	}
+	//pvclaim := clientset.CoreV1().PersistentVolumeClaims(apiv1.NamespaceDefault)
+	//pvc, err := pvclaim.Get(appName, metav1.GetOptions{})
+	/* pvcspec := &apiv1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolumeClaim",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: appName + "vol",
+			Labels: map[string]string{
+				"app": appName,
+			},
+		},
+		Spec: apiv1.PersistentVolumeClaimSpec{
+			AccessModes: []apiv1.PersistentVolumeAccessMode{
+				"ReadWriteOnce",
+			},
+			Resources: apiv1.ResourceRequirements{
+				Requests: apiv1.ResourceList{
+					"Storage": resource.Quantity{Format: resource.Format, d: intDecAmount(1000)},
+				},
+			},
+		},
+	} */
+
+	servc := clientset.CoreV1().Services(apiv1.NamespaceDefault)
+	svc, err := servc.Get(appName, metav1.GetOptions{})
+	switch {
+	case err == nil:
+		serviceSpec.ObjectMeta.ResourceVersion = svc.ObjectMeta.ResourceVersion
+		serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
+		_, err = servc.Update(serviceSpec)
 		if err != nil {
-			panic(err.Error())
+			return Creares{resultado: "NULL", error: err.Error()}
 		}
-		fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
-
-		// Examples for error handling:
-		// - Use helper functions like e.g. errors.IsNotFound()
-		// - And/or cast to StatusError and use its properties like e.g. ErrStatus.Message
-		_, err = clientset.CoreV1().Pods("default").Get("example-xxxxx", metav1.GetOptions{})
-		if errors.IsNotFound(err) {
-			fmt.Printf("Pod not found\n")
-		} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
-			fmt.Printf("Error getting pod %v\n", statusError.ErrStatus.Message)
-		} else if err != nil {
-			panic(err.Error())
-		} else {
-			fmt.Printf("Found pod\n")
+		fmt.Println("service updated")
+	case errors.IsNotFound(err):
+		_, err = servc.Create(serviceSpec)
+		if err != nil {
+			return Creares{resultado: "NULL", error: err.Error()}
 		}
-
-		time.Sleep(10 * time.Second)
+		fmt.Println("service created")
+	default:
+		return Creares{resultado: "NULL", error: err.Error()}
 	}
+	//fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
+	return Creares{resultado: "Creado el deployment: " + result.GetObjectMeta().GetName(), error: "OK"}
+
+}
+
+func int32p(i int32) *int32 {
+	return &i
 }
