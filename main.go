@@ -14,6 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 )
@@ -105,12 +106,12 @@ func crearDeplo(nombre string) Creares {
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		return Creares{Resultado: "NULL", Error: err.Error()}
+		return Creares{Resultado: "NULL", Error: "Incluster config: " + err.Error()}
 	}
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return Creares{Resultado: "NULL", Error: err.Error()}
+		return Creares{Resultado: "NULL", Error: "Clientset config: " + err.Error()}
 	}
 
 	//check deployments
