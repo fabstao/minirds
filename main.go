@@ -89,7 +89,7 @@ func main() {
 	router.GET("/login.aspx", Login)
 	router.POST("/login.aspx", Login)
 	router.GET("/dashboard.php", Dashboard)
-	router.GET("db/:nombre", CreaDBI)
+	router.GET("/db/:nombre", CreaDBI)
 
 	log.Fatal(http.ListenAndServe(":8800", router))
 }
