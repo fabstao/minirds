@@ -141,8 +141,9 @@ func crearDeplo(nombre string) Creares {
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
-							Name:  "mariadbfabs",
-							Image: "gcr.io/fabs-cl-02/mariadbfabs",
+							Name: "mariadbfabs",
+							//Image: "gcr.io/fabs-cl-02/mariadbfabs",
+							Image: "fabstao/mariadbfabs",
 							Ports: []apiv1.ContainerPort{
 								{
 									Name:          "mysql",
