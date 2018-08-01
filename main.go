@@ -123,7 +123,7 @@ func crearDeplo(nombre string) Creares {
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: nombre + "_depl",
+			Name: nombre + "-depl",
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int32p(1),
