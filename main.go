@@ -156,12 +156,12 @@ func crearDeplo(nombre string) Creares {
 									Value: "changeme1st",
 								},
 							},
-							VolumeMounts: []apiv1.VolumeMount{
+							/*VolumeMounts: []apiv1.VolumeMount{
 								{
 									Name:      appName + "vol",
 									MountPath: "/var/lib/mariadb",
 								},
-							},
+							}, */
 						},
 					},
 				},
