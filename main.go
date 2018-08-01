@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -104,6 +105,8 @@ type Creares struct {
 //**************************************************+
 func crearDeplo(nombre string) Creares {
 	// creates the in-cluster config
+	os.Setenv("KUBERNETES_SERVICE_HOST", "kubernetes.default.svc")
+	os.Setenv("KUBERNETES_SERVICE_PORT", "443")
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return Creares{Resultado: "NULL", Error: "Incluster config: " + err.Error()}
