@@ -94,9 +94,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8800", router))
 }
 
+//Creares is a struct...
 type Creares struct {
-	resultado string
-	error     string
+	Resultado string
+	Error     string
 }
 
 //**************************************************+
@@ -104,12 +105,12 @@ func crearDeplo(nombre string) Creares {
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		return Creares{resultado: "NULL", error: err.Error()}
+		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return Creares{resultado: "NULL", error: err.Error()}
+		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
 
 	//check deployments
@@ -168,7 +169,7 @@ func crearDeplo(nombre string) Creares {
 	fmt.Println("Creating deployment...")
 	result, err := deploymentsClient.Create(deployment)
 	if err != nil {
-		return Creares{resultado: "NULL", error: err.Error()}
+		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
 	serviceSpec := &apiv1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -226,20 +227,20 @@ func crearDeplo(nombre string) Creares {
 		serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
 		_, err = servc.Update(serviceSpec)
 		if err != nil {
-			return Creares{resultado: "NULL", error: err.Error()}
+			return Creares{Resultado: "NULL", Error: err.Error()}
 		}
 		fmt.Println("service updated")
 	case errors.IsNotFound(err):
 		_, err = servc.Create(serviceSpec)
 		if err != nil {
-			return Creares{resultado: "NULL", error: err.Error()}
+			return Creares{Resultado: "NULL", Error: err.Error()}
 		}
 		fmt.Println("service created")
 	default:
-		return Creares{resultado: "NULL", error: err.Error()}
+		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
 	//fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
-	return Creares{resultado: "Creado el deployment: " + result.GetObjectMeta().GetName(), error: "OK"}
+	return Creares{Resultado: "Creado el deployment: " + result.GetObjectMeta().GetName(), Error: "OK"}
 
 }
 
