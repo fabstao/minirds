@@ -236,11 +236,11 @@ func crearDeplo(nombre string) Creares {
 		}
 		fmt.Println("service updated")
 	case errors.IsNotFound(err):
-		elsvc, err := servc.Create(serviceSpec)
+		elsvc, errs := servc.Create(serviceSpec)
 		if err != nil {
-			return Creares{Resultado: "NULL", Error: err.Error()}
+			return Creares{Resultado: "NULL", Error: errs.Error()}
 		}
-		fmt.Println("service created")
+		fmt.Println("service created: ", elsvc.GetClusterName())
 	default:
 		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
