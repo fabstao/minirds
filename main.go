@@ -236,7 +236,7 @@ func crearDeplo(nombre string) Creares {
 		}
 		fmt.Println("service updated")
 	case errors.IsNotFound(err):
-		_, err = servc.Create(serviceSpec)
+		elsvc, err := servc.Create(serviceSpec)
 		if err != nil {
 			return Creares{Resultado: "NULL", Error: err.Error()}
 		}
@@ -245,19 +245,15 @@ func crearDeplo(nombre string) Creares {
 		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
 	//listasvc, err := servc.List(metav1.ListOptions{})
-	elsvc, err := servc.Get(appName, metav1.GetOptions{})
+	svcres, err := servc.Get(appName, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println("Error: " + err.Error())
 	}
-	elmapa := elsvc.GetLabels()
-	salmapa := "<p><table border=1>"
-	for k, v := range elmapa {
-		salmapa += "<tr><td>" + k + ": " + v + "</td></tr>"
-	}
-	salmapa += "</table></p>"
+	elmapa := svcres.GetObjectMeta().GetSelfLink()
+
 	//fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 	return Creares{Resultado: "Base de datos creada: " + result.GetObjectMeta().GetName() +
-		" " + salmapa, Error: "OK"}
+		" Svc:" + elmapa, Error: "OK"}
 
 }
 
