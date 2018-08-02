@@ -8,15 +8,38 @@
     <table border="1">
       <tr>
         <td>Nombre de la base de datos</td><td><input id="nombre" name="nombre"
+<<<<<<< HEAD
           type="text" maxlength="15" pattern="[A-Za-z]{15}" required></td>
+=======
+          type="text" maxlength="15" pattern="[A-Za-z]" onchange="valida()"></td>
+>>>>>>> test webhook
       </tr>
       <tr>
-        <td><input type="submit" value="Crear" onclick="crea()"></td>
+        <td><input id="bcrea" name="bcrea" type="submit" value="Crear" onclick="crea()" disabled></td>
       </tr>
     </table>
     <script type="text/javascript">
     function crea() {
-      window.location = "/db/" + document.getElementById("nombre").value;
+      var nombre=document.getElementById("nombre");
+      var rgx = /^[a-z0-9]+$/i;
+      if(rgx.test(nombre.value) ) {
+        window.location = "/db/" + nombre.value;
+      }
+      else {
+        alert("Sólo se pueden ingresar letras y números");
+      }
+    }
+    function valida() {
+      var nombre=document.getElementById("nombre");
+      var boton=document.getElementById("bcrea");
+      var rgx = /^[a-z0-9]+$/i;
+      if(rgx.test(nombre.value) ) {
+        bcrea.disabled = false;
+      }
+      else {
+        bcrea.disabled = true;
+        alert("Sólo se pueden ingresar letras y números");
+      }
     }
     </script>
   </body>

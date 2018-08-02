@@ -250,10 +250,13 @@ func crearDeplo(nombre string) Creares {
 		fmt.Println("Error: " + err.Error())
 	}
 	elmapa := elsvc.GetLabels()
-	fmt.Println(elmapa)
+	var salmapa string
+	for k, v := range elmapa {
+		salmapa += "<p>" + k + ": " + v + "</p>"
+	}
 	//fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 	return Creares{Resultado: "Base de datos creada: " + result.GetObjectMeta().GetName() +
-		" " + elsvc.Name, Error: "OK"}
+		" " + salmapa, Error: "OK"}
 
 }
 
