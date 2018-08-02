@@ -171,7 +171,7 @@ func crearDeplo(nombre string) Creares {
 	}
 
 	// Create Deployment
-	fmt.Println("Creating deployment...")
+	fmt.Println("Creating Base de datos...")
 	result, err := deploymentsClient.Create(deployment)
 	if err != nil {
 		return Creares{Resultado: "NULL", Error: err.Error()}
@@ -244,8 +244,16 @@ func crearDeplo(nombre string) Creares {
 	default:
 		return Creares{Resultado: "NULL", Error: err.Error()}
 	}
+	//listasvc, err := servc.List(metav1.ListOptions{})
+	elsvc, err := servc.Get(appName, metav1.GetOptions{})
+	if err != nil {
+		fmt.Println("Error: " + err.Error())
+	}
+	elmapa := elsvc.GetLabels()
+	fmt.Println(elmapa)
 	//fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
-	return Creares{Resultado: "Creado el deployment: " + result.GetObjectMeta().GetName(), Error: "OK"}
+	return Creares{Resultado: "Base de datos creada: " + result.GetObjectMeta().GetName() +
+		" " + elsvc.Name, Error: "OK"}
 
 }
 
