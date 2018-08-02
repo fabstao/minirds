@@ -1,4 +1,8 @@
 # minirds
+# ***************************************************
+# (C) 2018 Fabian Salamanca Dominguez
+# ***************************************************
+
 Basic mini RDS (Relational Database as a Service) based on MariaDB, using Jenkins for CI/CD, developed on Go
 
 Based on official K8s.io client-go
