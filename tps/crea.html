@@ -5,5 +5,19 @@
   </head>
   <body>
     <h3>MiniRDS</h3>
+    <table border="1">
+      <tr>
+        <td>Nombre de la base de datos</td><td><input id="nombre" name="nombre"
+          type="text" maxlength="15" pattern="[A-Za-z]"></td>
+      </tr>
+      <tr>
+        <td><input type="submit" value="Crear" onclick="crea()"></td>
+      </tr>
+    </table>
+    <script type="text/javascript">
+    function crea() {
+      window.location = "/db/" + document.getElementById("nombre").value;
+    }
+    </script>
   </body>
   </html>
