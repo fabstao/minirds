@@ -174,7 +174,7 @@ func crearDeplo(nombre string) Creares {
 	fmt.Println("Creating Base de datos...")
 	result, err := deploymentsClient.Create(deployment)
 	if err != nil {
-		return Creares{Resultado: "NULL", Error: err.Error()}
+		return Creares{Resultado: "NULL (create deployment)", Error: err.Error()}
 	}
 	serviceSpec := &apiv1.Service{
 		TypeMeta: metav1.TypeMeta{
@@ -232,13 +232,13 @@ func crearDeplo(nombre string) Creares {
 		serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
 		_, err = servc.Update(serviceSpec)
 		if err != nil {
-			return Creares{Resultado: "NULL", Error: err.Error()}
+			return Creares{Resultado: "NULL (servc->update)", Error: err.Error()}
 		}
 		fmt.Println("service updated")
 	case errors.IsNotFound(err):
 		elsvc, errs := servc.Create(serviceSpec)
 		if err != nil {
-			return Creares{Resultado: "NULL", Error: errs.Error()}
+			return Creares{Resultado: "NULL (servc->Create)", Error: errs.Error()}
 		}
 		fmt.Println("service created: ", elsvc.GetClusterName())
 	default:
