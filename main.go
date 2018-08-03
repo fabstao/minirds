@@ -174,7 +174,7 @@ func crearDeplo(nombre string) Creares {
 	// Create Deployment
 	fmt.Println("Creating Base de datos...")
 	result, err := deploymentsClient.Create(deployment)
-	if ( err != nil ) && ( !string.Contains(err.Error(), "already exists" )) {
+	if ( err != nil ) && ( !strings.Contains(err.Error(), "already exists" )) {
 		return Creares{Resultado: "NULL (create deployment)", Error: err.Error()}
 	}
 	serviceSpec := &apiv1.Service{
