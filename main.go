@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -173,7 +174,7 @@ func crearDeplo(nombre string) Creares {
 	// Create Deployment
 	fmt.Println("Creating Base de datos...")
 	result, err := deploymentsClient.Create(deployment)
-	if ( err != nil ) && ( err.Error() != "deployments.apps \""+nombre+"depl\" already exists" ) {
+	if ( err != nil ) && ( !string.Contains(err.Error(), "already exists" )) {
 		return Creares{Resultado: "NULL (create deployment)", Error: err.Error()}
 	}
 	serviceSpec := &apiv1.Service{
