@@ -113,7 +113,7 @@ func crearDeplo(nombre string) Creares {
 	}
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
+	if err != nil  {
 		return Creares{Resultado: "NULL", Error: "Clientset config: " + err.Error()}
 	}
 
@@ -173,7 +173,7 @@ func crearDeplo(nombre string) Creares {
 	// Create Deployment
 	fmt.Println("Creating Base de datos...")
 	result, err := deploymentsClient.Create(deployment)
-	if err != nil {
+	if ( err != nil ) && ( err.Error() != "deployments.apps \""+nombre+"depl\" already exists" ) {
 		return Creares{Resultado: "NULL (create deployment)", Error: err.Error()}
 	}
 	serviceSpec := &apiv1.Service{
