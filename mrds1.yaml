@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mrds1
-        image: gcr.io/fabs-cl-02/mrds1:5
+        image: gcr.io/fabs-cl-02/mrds1:8
         ports:
         - containerPort: 8800
         env:

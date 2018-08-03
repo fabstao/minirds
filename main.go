@@ -242,7 +242,7 @@ func crearDeplo(nombre string) Creares {
 		}
 		fmt.Println("service created: ", elsvc.GetClusterName())
 	default:
-		return Creares{Resultado: "NULL", Error: err.Error()}
+		return Creares{Resultado: "NULL - default svc", Error: err.Error()}
 	}
 	//listasvc, err := servc.List(metav1.ListOptions{})
 	svcres, err := servc.Get(appName, metav1.GetOptions{})
