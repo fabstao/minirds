@@ -232,7 +232,7 @@ func crearDeplo(nombre string) Creares {
 		serviceSpec.ObjectMeta.ResourceVersion = svc.ObjectMeta.ResourceVersion
 		//serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
 		_, err = servc.Update(serviceSpec)
-		if (err != nil) && (!strings.Contain(err.Error(),"clusterIP")) {
+		if (err != nil) && (!strings.Contains(err.Error(),"clusterIP")) {
 			return Creares{Resultado: "NULL (servc->update)", Error: err.Error()}
 		}
 		fmt.Println("service updated")
