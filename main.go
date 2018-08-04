@@ -230,7 +230,7 @@ func crearDeplo(nombre string) Creares {
 	switch {
 	case err == nil:
 		serviceSpec.ObjectMeta.ResourceVersion = svc.ObjectMeta.ResourceVersion
-		serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
+		//serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
 		_, err = servc.Update(serviceSpec)
 		if err != nil {
 			return Creares{Resultado: "NULL (servc->update)", Error: err.Error()}
