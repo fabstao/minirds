@@ -251,6 +251,7 @@ func ListarSvc() Creares {
 	}
 	lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
 	if err == nil {
+		fmt.Println(err.Error())
 		return Creares{Resultado: "NULL", Error: "Error lista: " + err.Error()}
 	}
 	slista := "<ul>\n"
