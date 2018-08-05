@@ -105,6 +105,7 @@ type Creares struct {
 	Error     string
 }
 
+//Listares is a struct...
 type Listares struct {
 	Resultado []string
 	Error     string
@@ -249,7 +250,7 @@ func ListarSvc() Listares {
 	config, err := rest.InClusterConfig()
 	var salidaer []string
 	if err != nil {
-		salidaer[0] = "NULL"
+		salidaer[0] = "0"
 		return Listares{Resultado: salidaer, Error: "Incluster config: " + err.Error()}
 	}
 	// creates the clientset
@@ -262,7 +263,8 @@ func ListarSvc() Listares {
 	lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
 	//lista, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
 	if err == nil {
-		fmt.Println(time.Now().String() + " | Error: creando lista")
+		fmt.Println(time.Now().String()+" | Error creando lista: ", err.Error())
+		salidaer[0] = ""
 		return Listares{Resultado: salidaer, Error: "Error lista: " + err.Error()}
 	}
 	var slista []string
