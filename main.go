@@ -105,6 +105,11 @@ type Creares struct {
 	Error     string
 }
 
+type Listares struct {
+	Resultado []string
+	Error     string
+}
+
 //**************************************************+
 func crearDeplo(nombre string) Creares {
 	// creates the in-cluster config
@@ -237,32 +242,34 @@ func crearDeplo(nombre string) Creares {
 }
 
 //ListarSvc is a function that lists DB services
-func ListarSvc() Creares {
+func ListarSvc() Listares {
 	// creates the in-cluster config
 	os.Setenv("KUBERNETES_SERVICE_HOST", "kubernetes.default.svc")
 	os.Setenv("KUBERNETES_SERVICE_PORT", "443")
 	config, err := rest.InClusterConfig()
+	var salidaer []string
 	if err != nil {
-		return Creares{Resultado: "NULL", Error: "Incluster config: " + err.Error()}
+		salidaer[0] = "NULL"
+		return Listares{Resultado: salidaer, Error: "Incluster config: " + err.Error()}
 	}
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		fmt.Println(time.Now().String() + " | Error: k8s config")
-		return Creares{Resultado: "NULL", Error: "Clientset config: " + err.Error()}
+		salidaer[0] = "NULL"
+		return Listares{Resultado: salidaer, Error: "Clientset config: " + err.Error()}
 	}
 	//lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
 	lista, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
 	if err == nil {
 		fmt.Println(time.Now().String() + " | Error: creando lista")
-		return Creares{Resultado: "NULL", Error: "Error lista: " + err.Error()}
+		return Listares{Resultado: salidaer, Error: "Error lista: " + err.Error()}
 	}
-	slista := "<ul>\n"
-	for _, val := range lista.Items {
-		slista += "\n<li>" + val.String() + "</li>"
+	var slista []string
+	for i, val := range lista.Items {
+		slista[i] = val.ClusterName
 	}
-	slista = slista + "\n</ul>"
-	return Creares{Resultado: slista, Error: "OK"}
+	return Listares{Resultado: slista, Error: "OK"}
 }
 
 func int32p(i int32) *int32 {
