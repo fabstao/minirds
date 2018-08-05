@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -218,14 +219,14 @@ func crearDeplo(nombre string) Creares {
 		if err != nil {
 			return Creares{Resultado: "NULL (servc->Create)", Error: errs.Error()}
 		}
-		fmt.Println("service created: ", elsvc.GetClusterName())
+		fmt.Println(time.Now().String()+" | service created: ", elsvc.GetClusterName())
 	default:
 		return Creares{Resultado: "NULL - default svc", Error: err.Error()}
 	}
 	//listasvc, err := servc.List(metav1.ListOptions{})
 	svcres, err := servc.Get(appName, metav1.GetOptions{})
 	if err != nil {
-		fmt.Println("Error: " + err.Error())
+		fmt.Println(time.Now().String() + " | Error: " + err.Error())
 	}
 	elmapa := svcres.GetObjectMeta().GetSelfLink()
 
@@ -251,7 +252,7 @@ func ListarSvc() Creares {
 	}
 	lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
 	if err == nil {
-		fmt.Println("Error: creando lista")
+		fmt.Println(time.Now().String() + " | Error: creando lista")
 		return Creares{Resultado: "NULL", Error: "Error lista: " + err.Error()}
 	}
 	slista := "<ul>\n"
