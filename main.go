@@ -259,15 +259,15 @@ func ListarSvc() Listares {
 		salidaer[0] = "NULL"
 		return Listares{Resultado: salidaer, Error: "Clientset config: " + err.Error()}
 	}
-	//lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
-	lista, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
+	lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
+	//lista, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
 	if err == nil {
 		fmt.Println(time.Now().String() + " | Error: creando lista")
 		return Listares{Resultado: salidaer, Error: "Error lista: " + err.Error()}
 	}
 	var slista []string
 	for i, val := range lista.Items {
-		slista[i] = val.ClusterName
+		slista[i] = val.String()
 	}
 	return Listares{Resultado: slista, Error: "OK"}
 }
