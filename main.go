@@ -248,9 +248,11 @@ func ListarSvc() Creares {
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
+		fmt.Println(time.Now().String() + " | Error: k8s config")
 		return Creares{Resultado: "NULL", Error: "Clientset config: " + err.Error()}
 	}
-	lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
+	//lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
+	lista, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
 	if err == nil {
 		fmt.Println(time.Now().String() + " | Error: creando lista")
 		return Creares{Resultado: "NULL", Error: "Error lista: " + err.Error()}
