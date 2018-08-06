@@ -262,7 +262,7 @@ func ListarSvc() Listares {
 		return Listares{Resultado: salidaer, Error: "Clientset config: " + err.Error()}
 	}
 	//lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
-	lista, err := clientset.CoreV1().Services("default").List(metav1.ListOptions{})
+	lista, err := clientset.CoreV1().Services(apiv1.NamespaceAll).List(metav1.ListOptions{})
 	if err == nil {
 		fmt.Println(time.Now().String()+" | Error creando lista: ", err.Error())
 		salidaer[0] = ""
