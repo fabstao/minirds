@@ -16,3 +16,4 @@ Show DB's access URL
 Improve UI
 Add user session capabilities to UI
 Ask for support with clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
+.
