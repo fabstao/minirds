@@ -11,7 +11,7 @@ Current version working only on Google's GKE.
 
 TODO
 
-Add list and delete functions
+Add list and delete functions<br>
 Show DB's access URL
 Improve UI
 Add user session capabilities to UI
