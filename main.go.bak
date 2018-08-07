@@ -122,3 +122,28 @@ func checknodes() {
 		time.Sleep(10 * time.Second)
 	}
 }
+
+//pvclaim := clientset.CoreV1().PersistentVolumeClaims(apiv1.NamespaceDefault)
+//pvc, err := pvclaim.Get(appName, metav1.GetOptions{})
+/* pvcspec := &apiv1.PersistentVolumeClaim{
+	TypeMeta: metav1.TypeMeta{
+		Kind:       "PersistentVolumeClaim",
+		APIVersion: "v1",
+	},
+	ObjectMeta: metav1.ObjectMeta{
+		Name: appName + "vol",
+		Labels: map[string]string{
+			"app": appName,
+		},
+	},
+	Spec: apiv1.PersistentVolumeClaimSpec{
+		AccessModes: []apiv1.PersistentVolumeAccessMode{
+			"ReadWriteOnce",
+		},
+		Resources: apiv1.ResourceRequirements{
+			Requests: apiv1.ResourceList{
+				"Storage": resource.Quantity{Format: resource.Format, d: intDecAmount(1000)},
+			},
+		},
+	},
+} */

@@ -14,10 +14,13 @@
       </tr>
     </table>
     <p>
-      	<ul>
-		<li>{{.Test}}</li>
-		<li>{{.Value}}</li>
-	</ul>
+      Status:<br>
+      	{{.Error}}
+    </p>
+    <p>
+      	{{range .Resultado}}
+          {{.}}
+        {{end}}
     </p>
   </body>
   </html>

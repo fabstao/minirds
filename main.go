@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -71,7 +73,8 @@ type ds1 struct {
 
 //Dashboard is a function...
 func Dashboard(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	err := tpl.ExecuteTemplate(w, "dashboard.html", ds1{Test: "OK", Value: 1})
+	rlista := ListarSvc()
+	err := tpl.ExecuteTemplate(w, "dashboard.html", rlista)
 	HandleError(w, err)
 }
 
@@ -103,6 +106,12 @@ type Creares struct {
 	Error     string
 }
 
+//Listares is a struct...
+type Listares struct {
+	Resultado []string
+	Error     string
+}
+
 //**************************************************+
 func crearDeplo(nombre string) Creares {
 	// creates the in-cluster config
@@ -114,13 +123,13 @@ func crearDeplo(nombre string) Creares {
 	}
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil  {
+	if err != nil {
 		return Creares{Resultado: "NULL", Error: "Clientset config: " + err.Error()}
 	}
 
 	//check deployments
 	//var no2 int32 = int32(2)
-	appName := nombre
+	appName := nombre + "db"
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -172,9 +181,9 @@ func crearDeplo(nombre string) Creares {
 	}
 
 	// Create Deployment
-	fmt.Println("Creating Base de datos...")
+	fmt.Println("Creando K8s deployment para base de datos...")
 	result, err := deploymentsClient.Create(deployment)
-	if ( err != nil ) && ( !strings.Contains(err.Error(), "already exists" )) {
+	if (err != nil) && (!strings.Contains(err.Error(), "already exists")) {
 		return Creares{Resultado: "NULL (create deployment)", Error: err.Error()}
 	}
 	serviceSpec := &apiv1.Service{
@@ -200,30 +209,6 @@ func crearDeplo(nombre string) Creares {
 			},
 		},
 	}
-	//pvclaim := clientset.CoreV1().PersistentVolumeClaims(apiv1.NamespaceDefault)
-	//pvc, err := pvclaim.Get(appName, metav1.GetOptions{})
-	/* pvcspec := &apiv1.PersistentVolumeClaim{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PersistentVolumeClaim",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: appName + "vol",
-			Labels: map[string]string{
-				"app": appName,
-			},
-		},
-		Spec: apiv1.PersistentVolumeClaimSpec{
-			AccessModes: []apiv1.PersistentVolumeAccessMode{
-				"ReadWriteOnce",
-			},
-			Resources: apiv1.ResourceRequirements{
-				Requests: apiv1.ResourceList{
-					"Storage": resource.Quantity{Format: resource.Format, d: intDecAmount(1000)},
-				},
-			},
-		},
-	} */
 
 	servc := clientset.CoreV1().Services(apiv1.NamespaceDefault)
 	svc, err := servc.Get(appName, metav1.GetOptions{})
@@ -232,23 +217,23 @@ func crearDeplo(nombre string) Creares {
 		serviceSpec.ObjectMeta.ResourceVersion = svc.ObjectMeta.ResourceVersion
 		//serviceSpec.Spec.LoadBalancerIP = svc.Spec.LoadBalancerIP
 		_, err = servc.Update(serviceSpec)
-		if (err != nil) && (!strings.Contains(err.Error(),"clusterIP")) {
+		if (err != nil) && (!strings.Contains(err.Error(), "clusterIP")) {
 			return Creares{Resultado: "NULL (servc->update)", Error: err.Error()}
 		}
-		fmt.Println("service updated")
+		fmt.Println("service updated: " + svc.GetName())
 	case errors.IsNotFound(err):
 		elsvc, errs := servc.Create(serviceSpec)
 		if err != nil {
 			return Creares{Resultado: "NULL (servc->Create)", Error: errs.Error()}
 		}
-		fmt.Println("service created: ", elsvc.GetClusterName())
+		fmt.Println(time.Now().String()+" | service created: ", elsvc.GetClusterName())
 	default:
 		return Creares{Resultado: "NULL - default svc", Error: err.Error()}
 	}
 	//listasvc, err := servc.List(metav1.ListOptions{})
 	svcres, err := servc.Get(appName, metav1.GetOptions{})
 	if err != nil {
-		fmt.Println("Error: " + err.Error())
+		fmt.Println(time.Now().String() + " | Error: " + err.Error())
 	}
 	elmapa := svcres.GetObjectMeta().GetSelfLink()
 
@@ -256,6 +241,39 @@ func crearDeplo(nombre string) Creares {
 	return Creares{Resultado: "Base de datos creada: " + result.GetObjectMeta().GetName() +
 		" Svc:" + elmapa, Error: "OK"}
 
+}
+
+//ListarSvc is a function that lists DB services
+func ListarSvc() Listares {
+	// creates the in-cluster config
+	os.Setenv("KUBERNETES_SERVICE_HOST", "kubernetes.default.svc")
+	os.Setenv("KUBERNETES_SERVICE_PORT", "443")
+	config, err := rest.InClusterConfig()
+	var salidaer []string
+	if err != nil {
+		salidaer[0] = "0"
+		return Listares{Resultado: salidaer, Error: "Incluster config: " + err.Error()}
+	}
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		fmt.Println(time.Now().String() + " | Error: k8s config")
+		salidaer[0] = "NULL"
+		return Listares{Resultado: salidaer, Error: "Clientset config: " + err.Error()}
+	}
+	//lista, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).List(metav1.ListOptions{})
+	lista, err := clientset.CoreV1().Services(apiv1.NamespaceAll).List(metav1.ListOptions{})
+	if err == nil {
+		fmt.Println(time.Now().String()+" | Error creando lista: ", err.Error())
+		salidaer[0] = ""
+		return Listares{Resultado: salidaer, Error: "Error lista: " + err.Error()}
+	}
+	var slista []string
+	for i, val := range lista.Items {
+		slista[i] = val.String()
+		fmt.Println(strconv.Itoa(i))
+	}
+	return Listares{Resultado: slista, Error: "OK"}
 }
 
 func int32p(i int32) *int32 {
